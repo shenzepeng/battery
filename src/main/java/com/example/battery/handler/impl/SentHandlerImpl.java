@@ -1,6 +1,7 @@
 package com.example.battery.handler.impl;
 
-import com.example.battery.cache.Cahces;
+import com.example.battery.cache.Caches;
+import com.example.battery.constants.Constants;
 import com.example.battery.constants.GroupIds;
 import com.example.battery.constants.Topics;
 import com.example.battery.dto.SentBatteryToDto;
@@ -19,19 +20,41 @@ public class SentHandlerImpl implements SentToHandler {
     private KafkaMessageProducer producer;
     @Override
     public IntegerResultResponse sentTo(SentBatteryToDto sentBatteryToDto) {
-        //顾客申请报废前，到机动车检验部门P处申请查验
-        //P审验合格发给顾客C一个密钥K，且一并发给政府G
-        producer.sent(Topics.SENT_KEY_TO_P, JsonUtils.objectToJson(sentBatteryToDto));
+        IntegerResultResponse result=new IntegerResultResponse(0);
+        //顾客将自己的东西发到审批部门P，检验成功
+        boolean checkByP = checkByP();
+        if (checkByP==false){
+            result.setResult(Constants.FAIL);
+            return result;
+        }else {
+            result.setResult(Constants.SUCCESS);
+        }
+
         //顾客C然后到回收单位R处提交发票信息和K
-        audit()
+        //audit();
         //R回收后将发票信息提交政府
         producer.sent(Topics.SENT_KEY_TO_GOVERNMENT, GroupIds.SENT_KEY_TO_GOVERNMENT);
-        return null;
+        return result;
     }
 
     private void audit(String key, String user){
         AuditUserAndKey auditUserAndKey=new AuditUserAndKey();
-        Cahces.USER_AND_KEY.add(auditUserAndKey);
+        Caches.USER_AND_AUDIT_KEY.put(user,auditUserAndKey);
+    }
+
+    /**
+     * 审计部门审计
+     * @return
+     */
+    private Boolean checkByP(){
+        boolean end= false;
+        //审计部门审计，审计部门审计成功后将信息提交给政府和用户
+        String sentToGovernmentKey="";
+        //把密钥发给政府
+        producer.sent(Topics.SENT_KEY_TO_GOVERNMENT, sentToGovernmentKey);
+        //发送给user密钥
+        producer.sent(Topics.R_MSG_TO_USER,GroupIds.R_MSG_TO_USER);
+        return end;
     }
 
 
