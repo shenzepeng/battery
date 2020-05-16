@@ -13,10 +13,8 @@ import java.util.List;
  */
 @Data
 public class SecondSentUser {
-    /**
-     * 很可能有多个
-     */
-    private List<String> idks;
+
+    private String idk;
     /**
      * 公钥 通过c的密钥 加密后
      */

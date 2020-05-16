@@ -2,10 +2,7 @@ package com.example.battery.service.impl;
 
 import com.example.battery.bo.*;
 import com.example.battery.service.SentService;
-import com.example.battery.utils.DataProcessUtils;
-import com.example.battery.utils.JsonUtils;
-import com.example.battery.utils.RSAUtils;
-import com.example.battery.utils.RsaTest;
+import com.example.battery.utils.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -32,9 +29,8 @@ public class SentServiceImpl implements SentService {
     public String GetMsgToG1(FirstUserSentGovernment firstUserSentGovernment,String privateKey) {
         log.info("第一步,{}", firstUserSentGovernment);
         String objectToJson = JsonUtils.objectToJson(firstUserSentGovernment);
-        byte[] stringToBytes = DataProcessUtils.stringToBytes(objectToJson);
-        byte[] bytes = RsaTest.decryptByPrivateKey(stringToBytes, privateKey);
-        return new String(bytes, "utf-8");
+        String encryptByPrivateKey = RsaTool.encryptByPrivateKey(objectToJson, privateKey);
+        return encryptByPrivateKey;
     }
     //第二步，政府G把第一步收到的信息解密 ，
     // 再用政府的公开钥KPG签名，
@@ -43,37 +39,36 @@ public class SentServiceImpl implements SentService {
     // 一并发给顾客C，其中K指的是政府回收部门
     @SneakyThrows
     @Override
-    public SecondSentUser getMsgToC2(String msg, String upk,String gpc,String usk,List<String> ikList) {
+    public SecondSentUser getMsgToC2(String msg, String upk,String gpc,String usk,String idk,String idp) {
         log.info("第二步 ,{},",msg,upk,gpc,usk);
-        byte[] bytes = RsaTest.encryptByPublicKey(msg.getBytes(), upk);
-        FirstUserSentGovernment firstUserSentGovernment = JsonUtils.jsonToPojo(new String(bytes), FirstUserSentGovernment.class);
+        String decryptByPublicKey = RsaTool.decryptByPublicKey(msg, upk);
+        FirstUserSentGovernment firstUserSentGovernment = JsonUtils.jsonToPojo(decryptByPublicKey, FirstUserSentGovernment.class);
         //再用政府的公开钥KPG签名，
         SingWithGSign singWithGSign=new SingWithGSign();
         BeanUtils.copyProperties(firstUserSentGovernment,singWithGSign);
         singWithGSign.setGpk(gpc);
         // 签名后的信息加上IDC  IDG  IDP一起用C的密钥加密，
-        RSAPrivateKey privateKey = RSAUtils.getPrivateKey(usk);
         String objectToJson = JsonUtils.objectToJson(singWithGSign);
-        String encrypt = RSAUtils.privateEncrypt(objectToJson, privateKey);
+        String encrypt = RsaTool.encryptByPrivateKey(objectToJson, usk);
         //加密后的信息再加上IDC  IDG  IDP和IDK1  IDK2……IDKK，
         SecondSentUser secondSentUser=new SecondSentUser();
         BeanUtils.copyProperties(firstUserSentGovernment,secondSentUser);
         secondSentUser.setMsg(encrypt);
-        secondSentUser.setIdks(ikList);
+        secondSentUser.setIdp(idp);
+        secondSentUser.setIdk(idk);
         return secondSentUser;
     }
     //第三步，顾客C把第二步得到的信息解密之后，
     //得到G签名的信息，加上IDC  IDP一起发给机动车检验部门P
     @SneakyThrows
     @Override
-    public ThirdInfoToP getMsgToCheck3(String upc, SecondSentUser secondSentUser) {
-        log.info("第三步 ,{},{}",upc,secondSentUser);
+    public ThirdInfoToP getMsgToCheck3(String upk, SecondSentUser secondSentUser) {
+        log.info("第三步 ,{},{}",upk,secondSentUser);
         String msg = secondSentUser.getMsg();
-        RSAPrivateKey privateKey = RSAUtils.getPrivateKey(upc);
-        String privateDecrypt = RSAUtils.privateDecrypt(msg, privateKey);
+        String decryptByPublicKey = RsaTool.decryptByPublicKey(msg, upk);
         ThirdInfoToP thirdInfoToP=new ThirdInfoToP();
         BeanUtils.copyProperties(secondSentUser,thirdInfoToP);
-        thirdInfoToP.setMsg(privateDecrypt);
+        thirdInfoToP.setMsg(decryptByPublicKey);
         return thirdInfoToP;
     }
     // 第四步，机动车检验之后，机动车检验部门P把第三步的签名信息中加入IDP，

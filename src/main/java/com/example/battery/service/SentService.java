@@ -12,7 +12,7 @@ public interface SentService {
     //第一步，顾客C把自己的信息IDC，政府信息IDG，时间戳Date和M用C的密钥加密后，发给政府G
     public String GetMsgToG1(FirstUserSentGovernment firstUserSentGovernment,String usk);
     //第二步，政府G把第一步收到的信息解密 ，再用政府的公开钥KPG签名，签名后的信息加上IDC  IDG  IDP一起用C的密钥加密，加密后的信息再加上IDC  IDG  IDP和IDK1  IDK2……IDKK，一并发给顾客C，其中K指的是政府回收部门
-    public SecondSentUser getMsgToC2(String msg, String upk, String gpc, String usk, List<String> ikList);
+    public SecondSentUser getMsgToC2(String msg, String upk,String gpc,String usk,String idk,String idp);
     //第三步，顾客C把第二步得到的信息解密之后，得到G签名的信息，加上IDC  IDP一起发给机动车检验部门P
     public ThirdInfoToP getMsgToCheck3(String pc, SecondSentUser secondSentUser);
    // 第四步，机动车检验之后，机动车检验部门P把第三步的签名信息中加入IDP，时间戳Date'，重新用政府G的公开钥进行签名，再用P的私密钥进行签名，加上IDP  IDC发给顾客C。其中重新签名后的信息，是C和R无法伪造的。

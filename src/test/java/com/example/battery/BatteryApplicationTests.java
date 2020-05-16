@@ -3,8 +3,10 @@ package com.example.battery;
 import com.example.battery.bo.*;
 import com.example.battery.service.SentService;
 import com.example.battery.utils.RSAUtils;
-import com.example.battery.utils.RsaTest;
+import com.example.battery.utils.RSAUtils1;
 
+
+import com.example.battery.utils.RsaTool;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -25,7 +27,9 @@ public class BatteryApplicationTests {
     private static String gPrivateKey;
     private static String pPublicKey;
     private static String pPrivateKey;
-    private static List<String> ikList=new ArrayList<>();
+    private static String iPublicKey;
+    private static String iPrivateKey;
+    private static String ik;
     private String idc="idc";
     private String idg="idg";
     private String idr="idr";
@@ -37,24 +41,32 @@ public class BatteryApplicationTests {
      * 初始化回收部门
      */
     static {
-        ikList.add("IDK1");
+        ik="IDK1";
 
         try {
-            Map<String, Object> keyMap = RsaTest.genKeyPair();
-            String publicKey = RsaTest.getPublicKey(keyMap);
-            String privateKey = RsaTest.getPrivateKey(keyMap);
+            Map<String, Object> keyMap = RsaTool.init();
+            String publicKey = RSAUtils1.getPublicKey(keyMap);
+            String privateKey = RSAUtils1.getPrivateKey(keyMap);
             uPublicKey = publicKey;
             uPrivateKey = privateKey;
 
-            Integer key2 = (int) (Math.random() * 10000);
-            Map<String, String> keys2 = RSAUtils.createKeys(key2);
-            gPublicKey = keys2.get("publicKey");
-            gPrivateKey = keys2.get("privateKey");
+            Map<String, Object> keyMap1 = RsaTool.init();
+            String publicKey1 = RSAUtils1.getPublicKey(keyMap1);
+            String privateKey1 = RSAUtils1.getPrivateKey(keyMap1);
+            gPublicKey = publicKey1;
+            gPrivateKey = privateKey1;
 
-            Integer key3 = (int) (Math.random() * 10000);
-            Map<String, String> keys3 = RSAUtils.createKeys(key3);
-            pPublicKey = keys3.get("publicKey");
-            pPrivateKey = keys3.get("privateKey");
+            Map<String, Object> keyMap2 = RsaTool.init();
+            String publicKey2 = RSAUtils1.getPublicKey(keyMap2);
+            String privateKey2 = RSAUtils1.getPrivateKey(keyMap2);
+            pPublicKey = publicKey2;
+            pPrivateKey = privateKey2;
+
+            Map<String, Object> keyMap3 = RsaTool.init();
+            String publicKey3 = RSAUtils1.getPublicKey(keyMap3);
+            String privateKey3 = RSAUtils1.getPrivateKey(keyMap3);
+            iPublicKey = publicKey3;
+            iPrivateKey = privateKey3;
         }catch (Exception e){
 
         }
@@ -75,7 +87,7 @@ public class BatteryApplicationTests {
        String msg= sentService.GetMsgToG1(firstUserSentGovernment, uPrivateKey);
        //第二步，政府G把第一步收到的信息解密 ，再用政府的公开钥KPG签名，签名后的信息加上IDC  IDG  IDP一起用C的密钥加密，加密后的信息再加上IDC  IDG  IDP和IDK1  IDK2……IDKK，一并发给顾客C，其中K指的是政府回收部门
 
-       SecondSentUser msgToC2 = sentService.getMsgToC2(msg, uPublicKey, gPublicKey, uPrivateKey,ikList);
+       SecondSentUser msgToC2 = sentService.getMsgToC2(msg, uPublicKey, gPublicKey, uPrivateKey,ik,iPublicKey);
        //第三步，顾客C把第二步得到的信息解密之后，得到G签名的信息，加上IDC  IDP一起发给机动车检验部门P
 
        ThirdInfoToP msgToCheck3 = sentService.getMsgToCheck3(uPublicKey, msgToC2);
