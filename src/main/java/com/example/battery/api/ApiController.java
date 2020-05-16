@@ -15,22 +15,22 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ApiController {
-    @Autowired
-    private SentToHandler sentToHandler;
-    /**
-     * 将电池送到出
-     */
-    @PostMapping("sent")
-    public SzpJsonResult<IntegerResultResponse> sentToBattery(SentBatteryToDto batteryToDto){
-        return SzpJsonResult.ok(sentToHandler.sentTo(batteryToDto));
-    }
-
-    /**
-     * 用户查询信息
-     * @return
-     */
-    @GetMapping
-    public SzpJsonResult<String> getUserInfo(String key){
-        return SzpJsonResult.ok(Caches.USER_AND_KEY.get(key));
-    }
+//    @Autowired
+//    private SentToHandler sentToHandler;
+//    /**
+//     * 将电池送到出
+//     */
+//    @PostMapping("sent")
+//    public SzpJsonResult<IntegerResultResponse> sentToBattery(SentBatteryToDto batteryToDto){
+//        return SzpJsonResult.ok(sentToHandler.sentTo(batteryToDto));
+//    }
+//
+//    /**
+//     * 用户查询信息
+//     * @return
+//     */
+//    @GetMapping
+//    public SzpJsonResult<String> getUserInfo(String key){
+//        return SzpJsonResult.ok(Caches.USER_AND_KEY.get(key));
+//    }
 }

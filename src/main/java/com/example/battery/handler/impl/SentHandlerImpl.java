@@ -20,21 +20,22 @@ public class SentHandlerImpl implements SentToHandler {
     private KafkaMessageProducer producer;
     @Override
     public IntegerResultResponse sentTo(SentBatteryToDto sentBatteryToDto) {
-        IntegerResultResponse result=new IntegerResultResponse(0);
-        //顾客将自己的东西发到审批部门P，检验成功
-        boolean checkByP = checkByP();
-        if (checkByP==false){
-            result.setResult(Constants.FAIL);
-            return result;
-        }else {
-            result.setResult(Constants.SUCCESS);
-        }
-
-        //顾客C然后到回收单位R处提交发票信息和K
-        //audit();
-        //R回收后将发票信息提交政府
-        producer.sent(Topics.SENT_KEY_TO_GOVERNMENT, GroupIds.SENT_KEY_TO_GOVERNMENT);
-        return result;
+//        IntegerResultResponse result=new IntegerResultResponse(0);
+//        //顾客将自己的东西发到审批部门P，检验成功
+//        boolean checkByP = checkByP();
+//        if (checkByP==false){
+//            result.setResult(Constants.FAIL);
+//            return result;
+//        }else {
+//            result.setResult(Constants.SUCCESS);
+//        }
+//
+//        //顾客C然后到回收单位R处提交发票信息和K
+//        //audit();
+//        //R回收后将发票信息提交政府
+//        producer.sent(Topics.SENT_KEY_TO_GOVERNMENT, GroupIds.SENT_KEY_TO_GOVERNMENT);
+//        return result;n
+        return null;
     }
 
     private void audit(String key, String user){
