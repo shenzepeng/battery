@@ -38,7 +38,6 @@ public class BatteryApplicationTests {
     private SentService sentService;
     /**
      * init
-     * 初始化回收部门
      */
     static {
         ik="IDK1";
